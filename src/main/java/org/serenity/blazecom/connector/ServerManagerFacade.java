@@ -1,12 +1,16 @@
 package org.serenity.blazecom.connector;
 
+import org.serenity.blazecom.records.BlazeComData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 
+import java.net.Socket;
+
 @Service
 public class ServerManagerFacade {
-
+    @Autowired
+    IPCConnector connector;
 
     ApplicationContext context;
     @Autowired
@@ -20,5 +24,7 @@ public class ServerManagerFacade {
     public void kill(int cause){
 
     }
-
+    public void sendJmsToHost(BlazeComData data){
+        connector.send(data);
+    }
 }

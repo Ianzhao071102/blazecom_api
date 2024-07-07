@@ -11,5 +11,6 @@ public enum Action {
     DISABLE_PLUGIN,
     UPDATE,
     MAP_UPDATE,
-    PLUGIN_UPDATE
+    PLUGIN_UPDATE,
+    REMOTE_LOG
 }
