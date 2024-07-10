@@ -24,7 +24,4 @@ public class ServerManagerFacade {
     public void kill(int cause){
 
     }
-    public void sendJmsToHost(BlazeComData data){
-        connector.send(data);
-    }
 }
