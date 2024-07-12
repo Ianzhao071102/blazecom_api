@@ -3,6 +3,6 @@ version: 0.1.0
 main: org.serenity.blazecom.BCAPI
 description: BlazeCom library
 author: Ian071102
-api-version: '1.18.2'
+api-version: 1.18
 load: STARTUP
 prefix: BlazeCom

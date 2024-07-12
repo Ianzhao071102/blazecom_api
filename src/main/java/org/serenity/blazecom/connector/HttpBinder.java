@@ -14,10 +14,8 @@ public class HttpBinder {
     IPCConnector hook;
     public HttpBinder() throws IOException {
         HttpServer server = HttpServer.create(new InetSocketAddress(9785), 0);
-
         server.createContext("/msg", (HttpHandler) hook);
         server.setExecutor(null);
-
         server.start();
     }
 }
