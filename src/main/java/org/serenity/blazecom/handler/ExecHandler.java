@@ -1,7 +1,6 @@
-package org.serenity.blazecom.handler.builtin;
+package org.serenity.blazecom.handler;
 
 import org.bukkit.Bukkit;
-import org.serenity.blazecom.handler.Handler;
 import org.serenity.blazecom.records.Action;
 import org.serenity.blazecom.records.BlazeComData;
 import org.springframework.stereotype.Service;

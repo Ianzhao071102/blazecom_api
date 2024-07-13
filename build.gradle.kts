@@ -12,6 +12,7 @@ repositories {
     mavenCentral()
 }
 dependencies {
+    implementation("io.javalin:javalin:6.1.3")
     implementation("org.springframework:spring-core:6.1.10")
     implementation("org.aspectj:aspectjrt:1.9.22.1")
     implementation("org.aspectj:aspectjweaver:1.9.22.1")

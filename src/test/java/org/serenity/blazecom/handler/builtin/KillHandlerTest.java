@@ -8,10 +8,6 @@ import org.serenity.blazecom.records.BlazeComData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
-
-import static org.junit.jupiter.api.Assertions.*;
-
 class KillHandlerTest extends Handler {
 
     @BeforeEach

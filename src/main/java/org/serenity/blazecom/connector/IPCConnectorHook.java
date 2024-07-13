@@ -4,6 +4,15 @@ import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
+import io.javalin.Javalin;
+import io.javalin.http.Context;
+import org.apache.hc.client5.http.classic.methods.HttpPost;
+import org.apache.hc.client5.http.impl.classic.*;
+import org.apache.hc.core5.http.ClassicHttpResponse;
+import org.apache.hc.core5.http.HttpEntity;
+import org.apache.hc.core5.http.HttpException;
+import org.apache.hc.core5.http.io.HttpClientResponseHandler;
+import org.apache.hc.core5.http.io.entity.StringEntity;
 import org.serenity.blazecom.handler.Handler;
 import org.serenity.blazecom.records.BlazeComData;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,23 +29,28 @@ import java.util.List;
 import java.util.Set;
 
 @Service
-public class IPCConnectorHook implements IPCConnector, HttpHandler {
+public class IPCConnectorHook implements IPCConnector{
     @Autowired
     String api_server_addr;
     @Autowired
     Set<Handler> handlers;
 
     @Override
-    public void send(BlazeComData msg) throws Exception {
-        URL url = new URL(api_server_addr);
-        URLConnection con = url.openConnection();
-        HttpURLConnection http = (HttpURLConnection) con;
-        http.setRequestMethod("POST");
-        http.setDoOutput(true);
-        http.setRequestProperty("Content-Type", "application/json charset=UTF-8");
-        http.connect();
-        try (OutputStream a = http.getOutputStream()) {
-            a.write(new Gson().toJson(msg).getBytes(StandardCharsets.UTF_8));
+    public void send(BlazeComData msg) throws IOException {
+        HttpPost post = new HttpPost(api_server_addr);
+
+        post.setEntity(new StringEntity(new Gson().toJson(msg)));
+        post.setHeader("Accept", "application/json");
+        post.setHeader("Content-type", "application/json");
+
+        try(CloseableHttpClient client = HttpClients.createDefault()){
+            client.execute(post, new HttpClientResponseHandler<Object>() {
+                @Override
+                public Object handleResponse(ClassicHttpResponse response) {
+                    if(response.getCode() == 200 || response.getCode() == 201) return null;
+                    else throw new RuntimeException("error handling response: " + new Gson().toJson(response));
+                }
+            });
         }
     }
 
@@ -54,26 +68,21 @@ public class IPCConnectorHook implements IPCConnector, HttpHandler {
             handler.handle(data);
         }
     }
-
     @Override
-    public void handle(HttpExchange exchange) throws IOException {
-        OutputStreamWriter writer = new OutputStreamWriter(exchange.getResponseBody());
-        if (exchange.getRequestMethod().equals("POST")) {
-            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(exchange.getRequestBody(), StandardCharsets.UTF_8));
-            StringBuilder requestBodyContent = new StringBuilder();
-            String line;
-            while ((line = bufferedReader.readLine()) != null) {
-                requestBodyContent.append(line);
-            }
-            String entity = requestBodyContent.toString();
+    public void handle(Context context) {
+        String pp = context.body();
+        if(context.req().getMethod().equalsIgnoreCase("POST")){
+            try{
+                Gson gson = new Gson();
+                BlazeComData data = gson.fromJson(pp, BlazeComData.class);
 
-            Gson gson = new Gson();
-            try {
-                BlazeComData data = gson.fromJson(entity, BlazeComData.class);
                 this.onMessage(data);
-            } catch (JsonSyntaxException e) {
-                writer.write("invalid json, not serializable as BlazeComData");
+            }catch(JsonSyntaxException e){
+                context.result("invalid json");
             }
+        }
+        else{
+            context.result("only accept POST");
         }
     }
 }
